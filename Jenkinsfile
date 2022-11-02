@@ -2,30 +2,30 @@ pipeline {
     agent any
 
     stages {
-        stage('Get Source') {
+
+        stage('Checkout Source') {
             steps {
-                git url: 'https://github.com/IslanCandido/kubedev-pedelogo-catalogo.git',
-                branch: 'master'
+                git url: 'https://github.com/fabiocaettano/kubedev-pedelogo-catalogo.git', branch: 'master'
             }
         }
 
-        stage('Docker Build') {
+        stage('Docker Build Image') {
             steps {
                 script {
-                    dockerapp = docker.build("islandev/pedelogo-catalogo:${env.BUILD_ID}",
-                    '-f ./src/PedeLogo.Catalogo.Api/Dockerfile')
+                    dockerapp = docker.build("islandev/api-produto:${env.BUILD_ID}",
+                      '-f ./src/PedeLogo.Catalogo.Api/Dockerfile .')
                 }
             }
         }
 
-        stage('Docker Push') {
+        stage('Docker Push Image') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub')
-                    dockerapp.push("latest")
-                    dockerapp.push("${env.BUILD_ID}")
+                        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
+                        dockerapp.push('latest')
+                        dockerapp.push("${env.BUILD_ID}")
+                    }
                 }
             }
         }
-    }
 }
